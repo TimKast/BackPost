@@ -1,12 +1,6 @@
 import { Client } from "@db/postgres";
 
-const client = new Client({
-  user: "postgres",
-  password: "postgrespassword",
-  hostname: "localhost",
-  port: 5432,
-  database: "testdb",
-});
+const client = new Client({}); // Uses environment variables for configuration
 
 export async function connectDB(): Promise<Client> {
   try {

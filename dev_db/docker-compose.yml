@@ -2,15 +2,23 @@ services:
   db:
     image: postgres:18
     restart: unless-stopped
+    env_file:
+      - .env
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgrespassword
-      POSTGRES_DB: testdb
+      POSTGRES_USER: ${PGUSER}
+      POSTGRES_PASSWORD: ${PGPASSWORD}
+      POSTGRES_DB: ${PGDATABASE}
     volumes:
       - db-data:/var/lib/postgresql
       - ./init_db:/docker-entrypoint-initdb.d:ro
     ports:
       - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${PGUSER} -d ${PGDATABASE}"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 10s
 
 volumes:
   db-data:
