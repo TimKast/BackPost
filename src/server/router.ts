@@ -119,5 +119,48 @@ export class Router {
         headers: { "Content-Type": "application/json" },
       });
     });
+
+    this.add("PUT", "/:tableName/:id", async (req, params) => {
+      const tableName = params.tableName;
+      const body = await req.json();
+      const id = params.id ? parseInt(params.id) : NaN;
+
+      if (isNaN(id)) {
+        return new Response(
+          JSON.stringify({ error: "Invalid ID parameter" }),
+          {
+            status: 400,
+            headers: { "Content-Type": "application/json" },
+          },
+        );
+      }
+
+      const result = await db.update(tableName!, id, body);
+      return new Response(JSON.stringify({ success: true, result }), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
+    });
+
+    this.add("DELETE", "/:tableName/:id", async (_req, params) => {
+      const tableName = params.tableName;
+      const id = params.id ? parseInt(params.id) : NaN;
+
+      if (isNaN(id)) {
+        return new Response(
+          JSON.stringify({ error: "Invalid ID parameter" }),
+          {
+            status: 400,
+            headers: { "Content-Type": "application/json" },
+          },
+        );
+      }
+
+      const result = await db.delete(tableName!, id);
+      return new Response(JSON.stringify({ success: true, result }), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
+    });
   }
 }

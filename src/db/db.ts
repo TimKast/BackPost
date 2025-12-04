@@ -48,7 +48,9 @@ export const db = {
     try {
       const keys = Object.keys(data);
       const values = Object.values(data);
-      const placeholders = keys.map((_, index) => `$${index + 1}`).join(", ");
+      const placeholders = keys.map((_value, index) => `$${index + 1}`).join(
+        ", ",
+      );
 
       const query = `INSERT INTO "${tableName}" (${
         keys.join(
@@ -57,6 +59,44 @@ export const db = {
       }) VALUES (${placeholders})`;
 
       return await client.queryObject(query, values);
+    } finally {
+      client.release();
+    }
+  },
+
+  async update(
+    tableName: string,
+    id: number,
+    data: JSON,
+  ): Promise<QueryObjectResult<unknown>> {
+    const client = await getClient();
+    try {
+      const keys = Object.keys(data);
+      const values = Object.values(data);
+      const setClause = keys.map((key, index) => `"${key}" = $${index + 1}`)
+        .join(", ");
+
+      const query = `UPDATE "${tableName}" SET ${setClause} WHERE id = $${
+        keys.length + 1
+      }`;
+
+      return await client.queryObject(query, [...values, id]);
+    } finally {
+      client.release();
+    }
+  },
+
+  async delete(
+    tableName: string,
+    id: number,
+  ): Promise<QueryObjectResult<unknown>> {
+    const client = await getClient();
+    try {
+      const result = await client.queryObject(
+        `DELETE FROM "${tableName}" WHERE id = $1`,
+        [id],
+      );
+      return result;
     } finally {
       client.release();
     }
