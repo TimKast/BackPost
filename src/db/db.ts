@@ -1,5 +1,6 @@
 import type { QueryObjectResult } from "@db/postgres";
 import { getClient } from "./connection.ts";
+import { Filter } from "../server/url_parser.ts";
 
 export const db = {
   async getTableNames(): Promise<string[]> {
@@ -14,26 +15,14 @@ export const db = {
     }
   },
 
-  async findAll(tableName: string): Promise<QueryObjectResult<unknown>> {
-    const client = await getClient();
-    try {
-      const result = await client.queryObject(`SELECT * FROM "${tableName}"`);
-      return result;
-    } finally {
-      client.release();
-    }
-  },
-
   async find(
     tableName: string,
-    id: number,
+    filters: Filter[],
   ): Promise<QueryObjectResult<unknown>> {
     const client = await getClient();
+
     try {
-      const result = await client.queryObject(
-        `SELECT * FROM "${tableName}" WHERE id = $1`,
-        [id],
-      );
+      const result = await client.queryObject(`SELECT * FROM "${tableName}" `);
       return result;
     } finally {
       client.release();
@@ -66,7 +55,7 @@ export const db = {
 
   async update(
     tableName: string,
-    id: number,
+    filters: Filter[],
     data: JSON,
   ): Promise<QueryObjectResult<unknown>> {
     const client = await getClient();
@@ -80,7 +69,7 @@ export const db = {
         keys.length + 1
       }`;
 
-      return await client.queryObject(query, [...values, id]);
+      return await client.queryObject(query, [...values]);
     } finally {
       client.release();
     }
@@ -88,14 +77,11 @@ export const db = {
 
   async delete(
     tableName: string,
-    id: number,
+    filters: Filter[],
   ): Promise<QueryObjectResult<unknown>> {
     const client = await getClient();
     try {
-      const result = await client.queryObject(
-        `DELETE FROM "${tableName}" WHERE id = $1`,
-        [id],
-      );
+      const result = await client.queryObject(`DELETE FROM "${tableName}" `);
       return result;
     } finally {
       client.release();

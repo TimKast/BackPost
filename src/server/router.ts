@@ -1,8 +1,10 @@
 import { db } from "../db/db.ts";
+import { Filter, parseUrlSearchParams } from "./url_parser.ts";
 
 export type Handler = (
   req: Request,
   params: Record<string, string | undefined>,
+  filters: Filter[],
 ) => Promise<Response>;
 
 export interface Route {
@@ -36,7 +38,9 @@ export class Router {
 
           if (match) {
             const params = match.pathname.groups || {};
-            return await route.handler(req, params);
+            const filters = parseUrlSearchParams(url.searchParams);
+            console.log("Parsed filters:", filters);
+            return await route.handler(req, params, filters);
           }
         }
       }
@@ -64,37 +68,10 @@ export class Router {
   }
 
   addDynamicRoutes() {
-    this.add("GET", "/:tableName", async (_req, params) => {
+    this.add("GET", "/:tableName", async (_req, params, filters) => {
       const tableName = params.tableName;
-      const data = await db.findAll(tableName!);
 
-      return new Response(
-        JSON.stringify({
-          table: tableName,
-          rowCount: data.rows.length,
-          data: data.rows,
-        }),
-        {
-          status: 200,
-          headers: { "Content-Type": "application/json" },
-        },
-      );
-    });
-
-    this.add("GET", "/:tableName/:id", async (_req, params) => {
-      const tableName = params.tableName;
-      const id = params.id ? parseInt(params.id) : NaN;
-      const data = await db.find(tableName!, id);
-
-      if (isNaN(id)) {
-        return new Response(
-          JSON.stringify({ error: "Invalid ID parameter" }),
-          {
-            status: 400,
-            headers: { "Content-Type": "application/json" },
-          },
-        );
-      }
+      const data = await db.find(tableName!, filters);
 
       return new Response(
         JSON.stringify({
@@ -120,43 +97,21 @@ export class Router {
       });
     });
 
-    this.add("PUT", "/:tableName/:id", async (req, params) => {
+    this.add("PUT", "/:tableName/", async (req, params, filters) => {
       const tableName = params.tableName;
       const body = await req.json();
-      const id = params.id ? parseInt(params.id) : NaN;
 
-      if (isNaN(id)) {
-        return new Response(
-          JSON.stringify({ error: "Invalid ID parameter" }),
-          {
-            status: 400,
-            headers: { "Content-Type": "application/json" },
-          },
-        );
-      }
-
-      const result = await db.update(tableName!, id, body);
+      const result = await db.update(tableName!, filters, body);
       return new Response(JSON.stringify({ success: true, result }), {
         status: 200,
         headers: { "Content-Type": "application/json" },
       });
     });
 
-    this.add("DELETE", "/:tableName/:id", async (_req, params) => {
+    this.add("DELETE", "/:tableName/:id", async (_req, params, filters) => {
       const tableName = params.tableName;
-      const id = params.id ? parseInt(params.id) : NaN;
 
-      if (isNaN(id)) {
-        return new Response(
-          JSON.stringify({ error: "Invalid ID parameter" }),
-          {
-            status: 400,
-            headers: { "Content-Type": "application/json" },
-          },
-        );
-      }
-
-      const result = await db.delete(tableName!, id);
+      const result = await db.delete(tableName!, filters);
       return new Response(JSON.stringify({ success: true, result }), {
         status: 200,
         headers: { "Content-Type": "application/json" },
