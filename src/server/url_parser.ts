@@ -17,10 +17,6 @@ where=<column>.<operator>:<value>, <column>.<operator>:<value>, ...
     notlike = not like
     ilike = iLike
     notilike = not iLike
-    in    = in list
-    notin = not in list
-    is    = is (NULL, TRUE, FALSE)
-    not   = is not (NULL, TRUE, FALSE)
 
 sorting:
 order=<column>:<asc|desc>, <column>:<asc|desc>, ...
@@ -31,14 +27,8 @@ offset=<number>
 
 logic operators:
 AND: default and:<filter1>,<filter2>,...
-OR: or:<filter1>,<filter2>,...
-NOT: prefix !: to any filter or logic group (e.g. !:or:<filter>, !:<column>=<operator>.<value>)
 
-Joins: not supported yet
-include=<related_table1>,<related_table2>,...
-
-
-?select=id,task,due&where=id.gt:3,or(task.like:%entry,task.like:first%)&order=id:desc&limit:10&offset:20
+?select=id,task,due&where=id.gt:3,task.like:%entry,task.like:first%&order=id:desc&limit=10&offset=20
 
 
 */
@@ -87,6 +77,8 @@ export function parseUrlSearchParams(
   searchParams: URLSearchParams,
 ): Filter[] {
   const filters: Filter[] = [];
+
+  console.log("Parsing search params:", searchParams);
 
   for (const [key, value] of searchParams.entries()) {
     switch (key) {
