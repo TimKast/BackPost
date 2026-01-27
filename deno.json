@@ -1,7 +1,7 @@
 {
   "tasks": {
-    "dev": "deno run --allow-net --env-file=./.env --env-file=./dev_db/.env --allow-env --watch src/main.ts",
-    "debug": "deno run --allow-net --env-file=./.env --env-file=./dev_db/.env --allow-env --inspect-brk src/main.ts"
+    "dev": "deno run --allow-read --allow-net --env-file=./.env --env-file=./dev_db/.env --allow-env --watch src/main.ts",
+    "debug": "deno run --allow-read --allow-net --env-file=./.env --env-file=./dev_db/.env --allow-env --inspect-brk src/main.ts"
   },
   "imports": {
     "@db/postgres": "jsr:@db/postgres@0.19.5",

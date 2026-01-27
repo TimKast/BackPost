@@ -1,5 +1,5 @@
 import { Router } from "./server/router.ts";
-import { generateOpenApi } from "./Schema/openapi3.ts";
+import { generateOpenApi } from "./Schema/openapi.ts";
 import { initSchema } from "./Schema/schema.ts";
 
 await initSchema();

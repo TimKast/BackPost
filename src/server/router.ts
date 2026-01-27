@@ -17,7 +17,10 @@ export class Router {
   private routes: Route[] = [];
 
   constructor() {
-    this.addDynamicRoutes();
+    this.add("GET", "/:tableName", getHandler);
+    this.add("POST", "/:tableName", postHandler);
+    this.add("PUT", "/:tableName/:id", putHandler);
+    this.add("DELETE", "/:tableName/:id", deleteHandler);
   }
 
   add(method: string, path: string, handler: Handler) {
@@ -39,7 +42,6 @@ export class Router {
           if (match) {
             const params = match.pathname.groups || {};
             const filters = parseUrlSearchParams(url.searchParams);
-            console.log("Parsed filters:", filters);
             return await route.handler(req, params, filters);
           }
         }
@@ -66,56 +68,56 @@ export class Router {
       );
     }
   }
-
-  addDynamicRoutes() {
-    this.add("GET", "/:tableName", async (_req, params, filters) => {
-      const tableName = params.tableName;
-
-      const data = await db.find(tableName!, filters);
-
-      return new Response(
-        JSON.stringify({
-          table: tableName,
-          rowCount: data.rows.length,
-          data: data.rows,
-        }),
-        {
-          status: 200,
-          headers: { "Content-Type": "application/json" },
-        },
-      );
-    });
-
-    this.add("POST", "/:tableName", async (req, params) => {
-      const tableName = params.tableName;
-      const body = await req.json();
-
-      const result = await db.create(tableName!, body);
-      return new Response(JSON.stringify({ success: true, result }), {
-        status: 201,
-        headers: { "Content-Type": "application/json" },
-      });
-    });
-
-    this.add("PUT", "/:tableName/", async (req, params, filters) => {
-      const tableName = params.tableName;
-      const body = await req.json();
-
-      const result = await db.update(tableName!, filters, body);
-      return new Response(JSON.stringify({ success: true, result }), {
-        status: 200,
-        headers: { "Content-Type": "application/json" },
-      });
-    });
-
-    this.add("DELETE", "/:tableName/:id", async (_req, params, filters) => {
-      const tableName = params.tableName;
-
-      const result = await db.delete(tableName!, filters);
-      return new Response(JSON.stringify({ success: true, result }), {
-        status: 200,
-        headers: { "Content-Type": "application/json" },
-      });
-    });
-  }
 }
+
+const getHandler: Handler = async (_req, params, filters) => {
+  const tableName = params.tableName;
+
+  const data = await db.find(tableName!, filters);
+
+  return new Response(
+    JSON.stringify({
+      table: tableName,
+      rowCount: data.rows.length,
+      data: data.rows,
+    }),
+    {
+      status: 200,
+      headers: { "Content-Type": "application/json" },
+    },
+  );
+};
+
+const postHandler: Handler = async (req, params) => {
+  const tableName = params.tableName;
+  const body = await req.json();
+
+  const result = await db.create(tableName!, body);
+  return new Response(JSON.stringify({ success: true, result }), {
+    status: 201,
+    headers: { "Content-Type": "application/json" },
+  });
+};
+
+const putHandler: Handler = async (req, params, filters) => {
+  const tableName = params.tableName;
+  const id = params.id;
+  const body = await req.json();
+
+  const result = await db.update(tableName!, filters, body);
+  return new Response(JSON.stringify({ success: true, result }), {
+    status: 200,
+    headers: { "Content-Type": "application/json" },
+  });
+};
+
+const deleteHandler: Handler = async (_req, params, filters) => {
+  const tableName = params.tableName;
+  const id = params.id;
+
+  const result = await db.delete(tableName!, filters);
+  return new Response(JSON.stringify({ success: true, result }), {
+    status: 200,
+    headers: { "Content-Type": "application/json" },
+  });
+};

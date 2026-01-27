@@ -3,18 +3,6 @@ import { getClient } from "./connection.ts";
 import { Filter } from "../server/url_parser.ts";
 
 export const db = {
-  async getTableNames(): Promise<string[]> {
-    const client = await getClient();
-    try {
-      const tables = await client.queryArray(
-        "SELECT table_name FROM information_schema.tables WHERE table_schema = 'public' AND table_type = 'BASE TABLE'",
-      );
-      return tables.rows.map((row) => row[0] as string);
-    } finally {
-      client.release();
-    }
-  },
-
   async find(
     tableName: string,
     filters: Filter[],
@@ -46,6 +34,8 @@ export const db = {
           ", ",
         )
       }) VALUES (${placeholders})`;
+
+      console.log("Create query:", query);
 
       return await client.queryObject(query, values);
     } finally {
@@ -81,7 +71,7 @@ export const db = {
   ): Promise<QueryObjectResult<unknown>> {
     const client = await getClient();
     try {
-      const result = await client.queryObject(`DELETE FROM "${tableName}" `);
+      const result = await client.queryObject(`DELETE FROM ${tableName} `);
       return result;
     } finally {
       client.release();
