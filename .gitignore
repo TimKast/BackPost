@@ -1,40 +1,70 @@
-# --- Deno ---
-deno_dir/
-.cache/
+############################
+# Deno
+############################
+
+# Lokale Deno-Artefakte (optional, selten genutzt)
 .deno/
 
-# --- TypeScript ---
-dist/
-build/
-out/
+# Environment
+.env
+.env.*
 
-# Emit aus einzelnen Dateien
-*.js
-*.js.map
+############################
+# Build / Output (nur falls vorhanden)
+############################
 
-# --- Editor / IDE ---
-# VSCode
-.vscode/*
-!.vscode/extensions.json
-!.vscode/settings.json
-!.vscode/launch.json
+/dist/
+/build/
+/out/
 
-# JetBrains
-.idea/
+############################
+# Dependencies (nur wenn npm: genutzt wird)
+############################
 
-# --- System Dateien ---
+node_modules/
+
+############################
+# Logs
+############################
+
+*.log
+
+############################
+# OS / Editor
+############################
+
+# macOS
 .DS_Store
+
+# Windows
 Thumbs.db
 
-# --- Logs ---
-logs/
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
+############################
+# VS Code
+############################
 
-# --- Sonstiges ---
-.env
-*.local
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+!.vscode/launch.json
+!.vscode/tasks.json
 
-other/
+############################
+# Tests / Coverage (optional)
+############################
+
+coverage/
+.nyc_output/
+
+############################
+# Cache (falls Tools sie anlegen)
+############################
+
+.cache/
+
+
+############################
+# Sonstiges
+############################
+
+/other/
