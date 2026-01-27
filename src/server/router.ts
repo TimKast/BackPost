@@ -4,7 +4,7 @@ import { Filter, parseUrlSearchParams } from "./url_parser.ts";
 export type Handler = (
   req: Request,
   params: Record<string, string | undefined>,
-  filters: Filter[],
+  filters: Filter,
 ) => Promise<Response>;
 
 export interface Route {

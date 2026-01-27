@@ -52,108 +52,59 @@ export const OperatorMap = {
 
 export type Operator = keyof typeof OperatorMap;
 
-export const UrlSegments = {
-  select: "SELECT",
-  where: "WHERE",
-  order: "ORDER BY",
-  limit: "LIMIT",
-  offset: "OFFSET",
-} as const;
-
-export type UrlSegment = keyof typeof UrlSegments;
-
 export type Filter = {
-  column: string;
-  operator: Operator | UrlSegment;
-  value: string;
-};
-
-export type LogicGroup = {
-  logic: "AND" | "OR" | "NOT";
-  filters: (Filter | LogicGroup)[];
+  select: string[];
+  where: string[];
+  order: string[];
+  limit: number;
+  offset: number;
 };
 
 export function parseUrlSearchParams(
   searchParams: URLSearchParams,
-): Filter[] {
-  const filters: Filter[] = [];
-
-  console.log("Parsing search params:", searchParams);
+): Filter {
+  const filters: Filter = {
+    select: [],
+    where: [],
+    order: [],
+    limit: 0,
+    offset: 0,
+  };
 
   for (const [key, value] of searchParams.entries()) {
     switch (key) {
       case "select":
-        filters.push({
-          column: value,
-          operator: "select",
-          value: "",
-        });
+        filters.select = value.split(",");
         break;
       case "where": {
         value.split(",").forEach((clause) => {
-          const [fieldOp, val] = clause.split(":");
-          const [column, op] = fieldOp.split(".");
-          if (column && op && val !== undefined) {
-            filters.push({
-              column: column,
-              operator: op as Operator,
-              value: val,
-            });
+          const [column, cond] = clause.split(".");
+          const [op, val] = cond.split(":");
+          if (column && OperatorMap[op as Operator] && val !== undefined) {
+            filters.where.push(
+              `${column} ${OperatorMap[op as Operator]} '${val}'`,
+            );
           } else {
             throw new Error(`Invalid where clause: ${clause}`);
           }
         });
-
         break;
       }
       case "order":
         value.split(",").forEach((clause) => {
           const [column, dir] = clause.split(":");
-          filters.push({
-            column: column,
-            operator: "order",
-            value: dir,
-          });
+          filters.order.push(`${column} ${dir.toUpperCase()}`);
         });
         break;
       case "limit":
-        filters.push({
-          column: "",
-          operator: "limit",
-          value: value,
-        });
+        filters.limit = Number(value);
         break;
       case "offset":
-        filters.push({
-          column: "",
-          operator: "offset",
-          value: value,
-        });
+        filters.offset = Number(value);
         break;
       default:
         throw new Error(`Unknown query parameter: ${key}`);
     }
   }
   return filters;
-}
-
-export function filtersToSql(
-  tableName: string,
-  filters: Filter[],
-): { query: string[]; values: unknown[] } {
-  const query: string[] = ["SELECT "];
-  const values: unknown[] = [];
-
-  if (filters[0].operator === "select") {
-    query.push(filters[0].column);
-  } else {
-    query.push("*");
-  }
-
-  query.push(` FROM "${tableName}" `);
-
-  for (const filter of filters) {
-    query.push(``);
-  }
-  return { query, values };
 }
