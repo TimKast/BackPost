@@ -23,3 +23,18 @@ INSERT INTO
 VALUES
   ('First entry'),
   ('Second entry');
+
+-- View ----------------------------------
+
+CREATE VIEW public.todo_view AS
+SELECT id, done, task, due FROM public.todos
+WHERE done = false;
+
+-- Procedures -----------------------------
+CREATE PROCEDURE hello_procedure()
+LANGUAGE plpgsql
+AS $$
+BEGIN
+  RAISE NOTICE 'Hallo PostgreSQL!';
+END;
+$$;
