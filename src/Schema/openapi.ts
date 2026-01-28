@@ -41,17 +41,9 @@ function buildPaths(db: DbSchema): Record<string, unknown> {
           "200": { description: "Successful response" },
         },
       },
-    };
-    paths[`/${table.name}/{id}`] = {
       delete: {
         summary: `Delete records from table ${table.name}`,
-        parameters: [
-          {
-            name: "id",
-            in: "path",
-            required: true,
-          },
-        ],
+        parameters: [],
         responses: {
           "200": { description: "Successful response" },
         },
@@ -87,7 +79,7 @@ function buildPaths(db: DbSchema): Record<string, unknown> {
 
 export function generateOpenApi(
   opts?: { title?: string; version?: string },
-): any {
+): Record<string, unknown> {
   const title = opts?.title ?? "DB API";
   const version = opts?.version ?? "1.0.0";
 

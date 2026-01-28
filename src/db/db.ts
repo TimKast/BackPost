@@ -68,7 +68,6 @@ export const db = {
     const client = await getClient();
     try {
       const keys = Object.keys(data);
-
       const values = Object.values(data);
 
       const setClause = keys.map((key, index) => `"${key}" = $${index + 1}`)
@@ -95,7 +94,17 @@ export const db = {
   ): Promise<QueryObjectResult<unknown>> {
     const client = await getClient();
     try {
-      const result = await client.queryObject(`DELETE FROM ${tableName} `);
+      let whereClause = "";
+      if (
+        filters.where.length > 0 && filters.select.length == 0 &&
+        filters.order.length == 0 && filters.limit == 0 && filters.offset == 0
+      ) {
+        whereClause = ` WHERE ${filters.where.join(" AND ")}`;
+      }
+
+      const result = await client.queryObject(
+        `DELETE FROM "${tableName}"${whereClause}`,
+      );
       return result;
     } finally {
       client.release();

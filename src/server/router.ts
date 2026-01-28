@@ -20,7 +20,7 @@ export class Router {
     this.add("GET", "/:tableName", getHandler);
     this.add("POST", "/:tableName", postHandler);
     this.add("PATCH", "/:tableName", patchHandler);
-    this.add("DELETE", "/:tableName/:id", deleteHandler);
+    this.add("DELETE", "/:tableName", deleteHandler);
   }
 
   add(method: string, path: string, handler: Handler) {
@@ -112,7 +112,6 @@ const patchHandler: Handler = async (req, params, filters) => {
 
 const deleteHandler: Handler = async (_req, params, filters) => {
   const tableName = params.tableName;
-  const id = params.id;
 
   const result = await db.delete(tableName!, filters);
   return new Response(JSON.stringify({ success: true, result }), {
