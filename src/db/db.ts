@@ -9,8 +9,6 @@ export const db = {
   ): Promise<QueryObjectResult<unknown>> {
     const client = await getClient();
 
-    console.log("filters:", filters);
-
     let query = `SELECT * FROM "${tableName}"`;
     if (filters.select.length > 0) {
       query = `SELECT ${filters.select.join(", ")} FROM "${tableName}"`;
@@ -22,8 +20,6 @@ export const db = {
       query += ` ORDER BY ${filters.order.join(", ")}`;
     }
     query += ` LIMIT ${filters.limit} OFFSET ${filters.offset}`;
-
-    console.log("Find query:", query);
 
     try {
       const result = await client.queryObject(query.trim());
@@ -51,8 +47,6 @@ export const db = {
         )
       }) VALUES (${placeholders})`;
 
-      console.log("Create query:", query);
-
       return await client.queryObject(query, values);
     } finally {
       client.release();
@@ -67,13 +61,22 @@ export const db = {
     const client = await getClient();
     try {
       const keys = Object.keys(data);
+      console.log("Updating with data keys:", keys);
       const values = Object.values(data);
+      console.log("Updating with data values:", values);
       const setClause = keys.map((key, index) => `"${key}" = $${index + 1}`)
         .join(", ");
-
-      const query = `UPDATE "${tableName}" SET ${setClause} WHERE id = $${
-        keys.length + 1
-      }`;
+      console.log("Set clause:", setClause);
+      let whereClause = "";
+      if (
+        filters.where.length > 0 && filters.select.length == 0 &&
+        filters.order.length == 0 && filters.limit == 0 && filters.offset == 0
+      ) {
+        whereClause = ` WHERE ${filters.where.join(" AND ")}`;
+        console.log("Where clause:", whereClause);
+      }
+      const query = `UPDATE "${tableName}" SET ${setClause} ${whereClause}`;
+      console.log("Update query:", query);
 
       return await client.queryObject(query, [...values]);
     } finally {

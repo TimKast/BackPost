@@ -11,7 +11,6 @@ export async function initSchema() {
   schema.tables = await getTables();
   schema.views = await getViews();
   schema.procedures = await getProcedures();
-  console.log("Schema initialized", schema);
 }
 
 async function getTables(): Promise<DbTable[]> {

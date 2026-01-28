@@ -26,17 +26,9 @@ function buildPaths(db: DbSchema): Record<string, unknown> {
           "200": { description: "Successful response" },
         },
       },
-    };
-    paths[`/${table.name}/{id}`] = {
-      put: {
+      patch: {
         summary: `Update records in table ${table.name}`,
-        parameters: [
-          {
-            name: "id",
-            in: "path",
-            required: true,
-          },
-        ],
+        parameters: [],
         requestBody: {
           required: true,
           content: {
@@ -49,6 +41,8 @@ function buildPaths(db: DbSchema): Record<string, unknown> {
           "200": { description: "Successful response" },
         },
       },
+    };
+    paths[`/${table.name}/{id}`] = {
       delete: {
         summary: `Delete records from table ${table.name}`,
         parameters: [

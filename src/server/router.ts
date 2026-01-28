@@ -19,7 +19,7 @@ export class Router {
   constructor() {
     this.add("GET", "/:tableName", getHandler);
     this.add("POST", "/:tableName", postHandler);
-    this.add("PUT", "/:tableName/:id", putHandler);
+    this.add("PATCH", "/:tableName", patchHandler);
     this.add("DELETE", "/:tableName/:id", deleteHandler);
   }
 
@@ -99,9 +99,8 @@ const postHandler: Handler = async (req, params) => {
   });
 };
 
-const putHandler: Handler = async (req, params, filters) => {
+const patchHandler: Handler = async (req, params, filters) => {
   const tableName = params.tableName;
-  const id = params.id;
   const body = await req.json();
 
   const result = await db.update(tableName!, filters, body);
