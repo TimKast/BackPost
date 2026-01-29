@@ -52,7 +52,7 @@ function buildPaths(db: DbSchema): Record<string, unknown> {
   }
 
   for (const view of db.views) {
-    paths[`/${view}`] = {
+    paths[`/view/${view}`] = {
       get: {
         summary: `Get all records from view ${view}`,
         responses: {
@@ -64,9 +64,16 @@ function buildPaths(db: DbSchema): Record<string, unknown> {
 
   // TODO: make Procedures callable
   for (const procedure of db.procedures) {
-    paths[`/${procedure}`] = {
+    paths[`/rpc/${procedure}`] = {
       post: {
         summary: `Call procedure ${procedure}`,
+        requestBody: {
+          content: {
+            "application/json": {
+              schema: { type: "object" },
+            },
+          },
+        },
         responses: {
           "200": { description: "Successful response" },
         },

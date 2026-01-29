@@ -21,6 +21,8 @@ export class Router {
     this.add("POST", "/:tableName", postHandler);
     this.add("PATCH", "/:tableName", patchHandler);
     this.add("DELETE", "/:tableName", deleteHandler);
+    this.add("GET", "/view/:tableName", getHandler);
+    this.add("POST", "/rpc/:procedure", rpcHandler);
   }
 
   add(method: string, path: string, handler: Handler) {
@@ -114,6 +116,17 @@ const deleteHandler: Handler = async (_req, params, filters) => {
   const tableName = params.tableName;
 
   const result = await db.delete(tableName!, filters);
+  return new Response(JSON.stringify({ success: true, result }), {
+    status: 200,
+    headers: { "Content-Type": "application/json" },
+  });
+};
+
+const rpcHandler: Handler = async (req, params) => {
+  const procedure = params.procedure;
+  const body = await req.json();
+
+  const result = await db.callProcedure(procedure!, body);
   return new Response(JSON.stringify({ success: true, result }), {
     status: 200,
     headers: { "Content-Type": "application/json" },

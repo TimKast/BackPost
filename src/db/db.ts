@@ -110,4 +110,24 @@ export const db = {
       client.release();
     }
   },
+
+  async callProcedure(
+    procedure: string,
+    params: JSON,
+  ): Promise<QueryObjectResult<unknown>> {
+    const client = await getClient();
+    try {
+      const keys = Object.keys(params);
+      const values = Object.values(params);
+      const placeholders = keys.map((_value, index) => `$${index + 1}`).join(
+        ", ",
+      );
+
+      const query = `CALL "${procedure}"(${placeholders})`;
+
+      return await client.queryObject(query, values);
+    } finally {
+      client.release();
+    }
+  },
 };
