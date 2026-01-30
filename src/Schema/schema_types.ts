@@ -6,7 +6,7 @@ export interface DbSchema {
 
 export type DbColumn = {
   name: string;
-  //pgType: string;
+  pgType: string;
 };
 
 export type DbTable = {

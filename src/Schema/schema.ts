@@ -64,6 +64,7 @@ async function getColumns(tableName: string): Promise<DbColumn[]> {
     );
     return columns.rows.map((row) => ({
       name: row[2] as string,
+      pgType: row[3] as string,
     }));
   } finally {
     client.release();

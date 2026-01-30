@@ -1,6 +1,6 @@
 import type { QueryObjectResult } from "@db/postgres";
-import { getClient } from "./connection.ts";
 import { Filter } from "../server/url_parser.ts";
+import { getClient } from "./connection.ts";
 
 export const db = {
   async find(
@@ -51,8 +51,6 @@ export const db = {
           ", ",
         )
       }) VALUES (${placeholders})`;
-
-      console.log("Create query:", query, "Values:", values);
 
       return await client.queryObject(query, values);
     } finally {
