@@ -1,7 +1,25 @@
-import { generateOpenApi } from "./Schema/openapi.ts";
-import { initSchema } from "./Schema/schema.ts";
+import { parseArgs } from "@std/cli/parse-args";
+import { loadConfig } from "./config/load.ts";
+import { initDBPool } from "./db/connection.ts";
+import { generateOpenApi } from "./schema/openapi.ts";
+import { initSchema } from "./schema/schema.ts";
 import { Router } from "./server/router.ts";
 import { handleSwaggerRequest } from "./server/swagger.ts";
+
+const args = parseArgs(Deno.args, {
+  string: ["config"],
+});
+
+const configPath = args.config;
+if (!configPath) {
+  console.error("Error: --config argument is required.");
+  Deno.exit(1);
+}
+
+const config = await loadConfig(configPath);
+console.log("Config loaded successfully: \n", config);
+
+initDBPool(config.db.url);
 
 await initSchema();
 

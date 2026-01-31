@@ -1,0 +1,12 @@
+{
+  "db": {
+    "url": "postgres://postgres:secret@localhost:5432/testdb"
+  },
+  "auth": {
+    "enabled": true,
+    "authTable": {
+      "schema": "auth",
+      "name": "users"
+    }
+  }
+}
