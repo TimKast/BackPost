@@ -19,7 +19,7 @@ if (!configPath) {
 const config = await loadConfig(configPath);
 console.log("Config loaded successfully: \n", config);
 
-initDBPool(config.db.url);
+await initDBPool(config);
 
 await initSchema();
 

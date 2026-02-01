@@ -60,7 +60,9 @@ export async function loadConfig(configPath: string): Promise<ConfigSchema> {
       config.auth.mode = defaultConfig.auth!.mode;
     } else if (config.auth.mode === "login" && !config.auth.loginTable) {
       config.auth.loginTable = defaultConfig.auth!.loginTable;
-      console.warn("Warning: auth.loginTable not specified, using default: auth.users.");
+      console.warn(
+        "Warning: auth.loginTable not specified, using default:auth.users.",
+      );
     }
   }
 
