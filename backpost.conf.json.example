@@ -1,0 +1,12 @@
+{
+  "db": {
+    "url": "postgres://backpost_app:secret@localhost:5432/testdb"
+  },
+  "auth": {
+    "mode": "login",
+    "loginTable": {
+      "schema": "auth",
+      "name": "user"
+    }
+  }
+}

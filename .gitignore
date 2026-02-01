@@ -68,3 +68,5 @@ coverage/
 ############################
 
 /other/
+
+backpost.conf.json
