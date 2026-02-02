@@ -3,10 +3,12 @@
     "url": "postgres://backpost_app:secret@localhost:5432/testdb"
   },
   "auth": {
-    "mode": "login",
-    "loginTable": {
-      "schema": "auth",
-      "name": "user"
+    "schema": "auth",
+    "key": {
+      "table": "keys"
+    },
+    "login": {
+      "table": "users"
     }
   }
 }
