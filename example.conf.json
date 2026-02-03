@@ -4,11 +4,7 @@
   },
   "auth": {
     "schema": "auth",
-    "key": {
-      "table": "keys"
-    },
-    "login": {
-      "table": "users"
-    }
+    "key_table": "keys",
+    "login_table": "users"
   }
 }

@@ -1,5 +1,5 @@
 import { isAbsolute, resolve } from "@std/path";
-import { ConfigSchema, defaultConfig } from "./schema.ts";
+import { ConfigSchema, defaultAuth } from "./schema.ts";
 
 export async function loadConfig(configPath: string): Promise<ConfigSchema> {
   let config: ConfigSchema;
@@ -54,15 +54,16 @@ export async function loadConfig(configPath: string): Promise<ConfigSchema> {
   }
 
   if (!config.auth) {
-    config.auth = defaultConfig.auth;
+    config.auth = defaultAuth;
   } else {
-    if (config.auth.mode === undefined) {
-      config.auth.mode = defaultConfig.auth!.mode;
-    } else if (config.auth.mode === "login" && !config.auth.loginTable) {
-      config.auth.loginTable = defaultConfig.auth!.loginTable;
-      console.warn(
-        "Warning: auth.loginTable not specified, using default:auth.users.",
-      );
+    if (!config.auth.schema) {
+      config.auth.schema = defaultAuth.schema;
+    }
+    if (!config.auth.key_table) {
+      config.auth!.key_table = defaultAuth.key_table;
+    }
+    if (!config.auth.login_table) {
+      config.auth.login_table = defaultAuth.login_table;
     }
   }
 

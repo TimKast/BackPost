@@ -1,8 +1,9 @@
 import { parseArgs } from "@std/cli/parse-args";
 import { loadConfig } from "./config/load.ts";
-import { initDBPool } from "./db/connection.ts";
+import { initDB } from "./db/connection.ts";
 import { generateOpenApi } from "./schema/openapi.ts";
 import { initSchema } from "./schema/schema.ts";
+import { initAuth } from "./server/auth.ts";
 import { Router } from "./server/router.ts";
 import { handleSwaggerRequest } from "./server/swagger.ts";
 
@@ -19,7 +20,9 @@ if (!configPath) {
 const config = await loadConfig(configPath);
 console.log("Config loaded successfully: \n", config);
 
-await initDBPool(config);
+await initDB(config);
+
+await initAuth(config);
 
 await initSchema();
 
