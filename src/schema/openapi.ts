@@ -36,6 +36,9 @@ function buildPaths(db: DbSchema): Record<string, unknown> {
     paths[`/${table.name}`] = {
       get: {
         summary: `Get all records from table ${table.name}`,
+        tags: [
+          `${table.schema}`,
+        ],
         parameters: [
           {
             $ref: "#/components/parameters/select",
@@ -59,6 +62,9 @@ function buildPaths(db: DbSchema): Record<string, unknown> {
       },
       post: {
         summary: `Create a new record in table ${table.name}`,
+        tags: [
+          `${table.schema}`,
+        ],
         requestBody: {
           required: true,
           content: {
@@ -74,6 +80,9 @@ function buildPaths(db: DbSchema): Record<string, unknown> {
       },
       patch: {
         summary: `Update records in table ${table.name}`,
+        tags: [
+          `${table.schema}`,
+        ],
         parameters: [
           {
             $ref: "#/components/parameters/where",
@@ -94,6 +103,9 @@ function buildPaths(db: DbSchema): Record<string, unknown> {
       },
       delete: {
         summary: `Delete records from table ${table.name}`,
+        tags: [
+          `${table.schema}`,
+        ],
         parameters: [
           {
             $ref: "#/components/parameters/where",
@@ -107,9 +119,12 @@ function buildPaths(db: DbSchema): Record<string, unknown> {
   }
 
   for (const view of db.views) {
-    paths[`/view/${view}`] = {
+    paths[`/view/${view.name}`] = {
       get: {
-        summary: `Get all records from view ${view}`,
+        summary: `Get all records from view ${view.name}`,
+        tags: [
+          `${view.schema}`,
+        ],
         parameters: [
           {
             $ref: "#/components/parameters/select",
@@ -136,9 +151,12 @@ function buildPaths(db: DbSchema): Record<string, unknown> {
 
   // TODO: make Procedures callable with arguments
   for (const procedure of db.procedures) {
-    paths[`/rpc/${procedure}`] = {
+    paths[`/rpc/${procedure.name}`] = {
       post: {
-        summary: `Call procedure ${procedure}`,
+        summary: `Call procedure ${procedure.name}`,
+        tags: [
+          `${procedure.schema}`,
+        ],
         requestBody: {
           content: {
             "application/json": {

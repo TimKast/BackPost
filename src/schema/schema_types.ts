@@ -1,7 +1,7 @@
 export interface DbSchema {
   tables: DbTable[];
-  views: string[];
-  procedures: string[];
+  views: DbView[];
+  procedures: DbProcedure[];
 }
 
 export type DbColumn = {
@@ -10,7 +10,19 @@ export type DbColumn = {
 };
 
 export type DbTable = {
+  schema: string;
   name: string;
   columns: DbColumn[];
   primaryKey: string[];
+};
+
+export type DbView = {
+  schema: string;
+  name: string;
+  columns: DbColumn[];
+};
+
+export type DbProcedure = {
+  schema: string;
+  name: string;
 };

@@ -1,5 +1,11 @@
 import { getClient } from "../db/connection.ts";
-import { DbColumn, DbSchema, DbTable } from "./schema_types.ts";
+import {
+  DbColumn,
+  DbProcedure,
+  DbSchema,
+  DbTable,
+  DbView,
+} from "./schema_types.ts";
 
 export const schema: DbSchema = {
   tables: [],
@@ -17,12 +23,13 @@ async function getTables(): Promise<DbTable[]> {
   const client = await getClient();
   try {
     const tables = await client.queryArray(
-      "SELECT table_name FROM information_schema.tables WHERE table_schema = 'public' AND table_type = 'BASE TABLE'",
+      "SELECT table_schema, table_name FROM information_schema.tables WHERE table_type = 'BASE TABLE' AND table_schema != 'information_schema' AND table_schema != 'pg_catalog';",
     );
     const result = tables.rows.map(async (row) => ({
-      name: row[0] as string,
-      columns: await getColumns(row[0] as string),
-      primaryKey: await getPrimaryKey(row[0] as string),
+      schema: row[0] as string,
+      name: row[1] as string,
+      columns: await getColumns(row[1] as string),
+      primaryKey: await getPrimaryKey(row[1] as string),
     }));
 
     return Promise.all(result);
@@ -31,25 +38,32 @@ async function getTables(): Promise<DbTable[]> {
   }
 }
 
-async function getViews(): Promise<string[]> {
+async function getViews(): Promise<DbView[]> {
   const client = await getClient();
   try {
     const views = await client.queryArray(
-      "SELECT table_name FROM information_schema.tables WHERE table_schema = 'public' AND table_type = 'VIEW'",
+      "SELECT table_schema, table_name FROM information_schema.tables WHERE table_type = 'VIEW' AND table_schema != 'information_schema' AND table_schema != 'pg_catalog';",
     );
-    return views.rows.map((row) => row[0] as string);
+    return Promise.all(views.rows.map(async (row) => ({
+      schema: row[0] as string,
+      name: row[1] as string,
+      columns: await getColumns(row[1] as string),
+    })));
   } finally {
     client.release();
   }
 }
 
-async function getProcedures(): Promise<string[]> {
+async function getProcedures(): Promise<DbProcedure[]> {
   const client = await getClient();
   try {
     const procedures = await client.queryArray(
-      "SELECT routine_name FROM information_schema.routines WHERE routine_schema = 'public' AND routine_type = 'PROCEDURE'",
+      "SELECT routine_schema, routine_name FROM information_schema.routines WHERE routine_type = 'PROCEDURE' AND routine_schema != 'information_schema' AND routine_schema != 'pg_catalog';",
     );
-    return procedures.rows.map((row) => row[0] as string);
+    return Promise.all(procedures.rows.map((row) => ({
+      schema: row[0] as string,
+      name: row[1] as string,
+    })));
   } finally {
     client.release();
   }
