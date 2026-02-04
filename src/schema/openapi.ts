@@ -33,7 +33,7 @@ function buildPaths(db: DbSchema): Record<string, unknown> {
   const paths: Record<string, unknown> = {};
 
   for (const table of db.tables) {
-    paths[`/${table.name}`] = {
+    paths[`/${table.schema}/${table.name}`] = {
       get: {
         summary: `Get all records from table ${table.name}`,
         tags: [
@@ -69,7 +69,9 @@ function buildPaths(db: DbSchema): Record<string, unknown> {
           required: true,
           content: {
             "application/json": {
-              schema: { $ref: `#/components/schemas/${table.name}` },
+              schema: {
+                $ref: `#/components/schemas/${table.schema}.${table.name}`,
+              },
               example: columnsToExample(table.columns),
             },
           },
@@ -92,7 +94,9 @@ function buildPaths(db: DbSchema): Record<string, unknown> {
           required: true,
           content: {
             "application/json": {
-              schema: { $ref: `#/components/schemas/${table.name}` },
+              schema: {
+                $ref: `#/components/schemas/${table.schema}.${table.name}`,
+              },
               example: columnsToExample(table.columns),
             },
           },
@@ -119,7 +123,7 @@ function buildPaths(db: DbSchema): Record<string, unknown> {
   }
 
   for (const view of db.views) {
-    paths[`/view/${view.name}`] = {
+    paths[`/${view.schema}/view/${view.name}`] = {
       get: {
         summary: `Get all records from view ${view.name}`,
         tags: [
@@ -151,7 +155,7 @@ function buildPaths(db: DbSchema): Record<string, unknown> {
 
   // TODO: make Procedures callable with arguments
   for (const procedure of db.procedures) {
-    paths[`/rpc/${procedure.name}`] = {
+    paths[`/${procedure.schema}/rpc/${procedure.name}`] = {
       post: {
         summary: `Call procedure ${procedure.name}`,
         tags: [
@@ -180,7 +184,7 @@ function buildComponents(db: DbSchema): Record<string, unknown> {
   components["schemas"] = schemas;
 
   for (const table of db.tables) {
-    schemas[`${table.name}`] = {
+    schemas[`${table.schema}.${table.name}`] = {
       type: "object",
       properties: Object.fromEntries(
         table.columns.map((
