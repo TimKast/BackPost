@@ -18,6 +18,9 @@ export async function initDB(config: ConfigSchema) {
           `Warning: Key table '${config.auth.schema}.${config.auth.key_table}' does not exist.`,
         );
         await client.queryArray(
+          `CREATE SCHEMA IF NOT EXISTS ${config.auth.schema};`,
+        );
+        await client.queryArray(
           `CREATE TABLE IF NOT EXISTS ${config.auth.schema}.${config.auth.key_table} (
             id SERIAL PRIMARY KEY,
             key TEXT UNIQUE NOT NULL

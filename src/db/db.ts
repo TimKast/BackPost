@@ -1,4 +1,5 @@
 import type { QueryObjectResult } from "@db/postgres";
+import { Credentials } from "../handler/auth_handler.ts";
 import { Filter } from "../server/url_parser.ts";
 import { getClient } from "./connection.ts";
 
@@ -124,6 +125,30 @@ export const db = {
       const query = `CALL "${procedure}"(${placeholders})`;
 
       return await client.queryObject(query, values);
+    } finally {
+      client.release();
+    }
+  },
+};
+
+export const dbAuth = {
+  async login(
+    schema: string,
+    userTable: string,
+    credentials: Credentials,
+  ): Promise<unknown> {
+    const client = await getClient();
+    try {
+      const values = Object.values(credentials);
+
+      const query =
+        `SELECT * FROM ${schema}.${userTable} WHERE username = $1 AND password = $2 LIMIT 1`;
+
+      const result = await client.queryObject(query, values);
+      if (result.rowCount === 0) {
+        return null;
+      }
+      return result.rows[0];
     } finally {
       client.release();
     }

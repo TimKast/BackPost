@@ -22,13 +22,17 @@ export interface Route {
 export class Router {
   private routes: Route[] = [];
 
-  constructor() {
+  constructor(authHandlers?: { login?: Handler }) {
     this.add("GET", "/:tableName", getHandler);
     this.add("POST", "/:tableName", postHandler);
     this.add("PATCH", "/:tableName", patchHandler);
     this.add("DELETE", "/:tableName", deleteHandler);
     this.add("GET", "/view/:tableName", getHandler);
     this.add("POST", "/rpc/:procedure", rpcHandler);
+
+    if (authHandlers?.login) {
+      this.add("POST", "/auth/login", authHandlers.login);
+    }
   }
 
   add(method: string, path: string, handler: Handler) {
