@@ -1,4 +1,4 @@
-import { create, verify } from "@emrahcom/jwt";
+import { create, Payload, verify } from "@emrahcom/jwt";
 
 const secret = Deno.env.get("JWT_SECRET")!;
 const encoder = new TextEncoder();
@@ -21,7 +21,7 @@ export async function createToken(userId: string): Promise<string> {
   return jwt;
 }
 
-export async function verifyToken(token: string) {
+export async function verifyToken(token: string): Promise<Payload> {
   try {
     const payload = await verify(token, key);
     return payload;

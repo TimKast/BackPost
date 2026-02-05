@@ -10,9 +10,9 @@ export const db = {
   ): Promise<QueryObjectResult<unknown>> {
     const client = await getClient();
 
-    let query = `SELECT * FROM "${tableName}"`;
+    let query = `SELECT * FROM ${tableName}`;
     if (filters.select.length > 0) {
-      query = `SELECT ${filters.select.join(", ")} FROM "${tableName}"`;
+      query = `SELECT ${filters.select.join(", ")} FROM ${tableName}`;
     }
     if (filters.where.length > 0) {
       query += ` WHERE ${filters.where.join(" AND ")}`;
@@ -47,7 +47,7 @@ export const db = {
         ", ",
       );
 
-      const query = `INSERT INTO "${tableName}" (${
+      const query = `INSERT INTO ${tableName} (${
         keys.join(
           ", ",
         )
@@ -79,7 +79,7 @@ export const db = {
       ) {
         whereClause = ` WHERE ${filters.where.join(" AND ")}`;
       }
-      const query = `UPDATE "${tableName}" SET ${setClause} ${whereClause}`;
+      const query = `UPDATE ${tableName} SET ${setClause} ${whereClause}`;
 
       return await client.queryObject(query, [...values]);
     } finally {
@@ -102,7 +102,7 @@ export const db = {
       }
 
       const result = await client.queryObject(
-        `DELETE FROM "${tableName}"${whereClause}`,
+        `DELETE FROM ${tableName} ${whereClause}`,
       );
       return result;
     } finally {
@@ -122,7 +122,7 @@ export const db = {
         ", ",
       );
 
-      const query = `CALL "${procedure}"(${placeholders})`;
+      const query = `CALL ${procedure}(${placeholders})`;
 
       return await client.queryObject(query, values);
     } finally {
@@ -142,13 +142,54 @@ export const dbAuth = {
       const values = Object.values(credentials);
 
       const query =
-        `SELECT * FROM ${schema}.${userTable} WHERE username = $1 AND password = $2 LIMIT 1`;
+        `SELECT id FROM ${schema}.${userTable} WHERE username = $1 AND password = $2 LIMIT 1`;
 
       const result = await client.queryObject(query, values);
       if (result.rowCount === 0) {
         return null;
       }
-      return result.rows[0];
+      return result.rows[0] as { id: number };
+    } finally {
+      client.release();
+    }
+  },
+
+  async register(
+    schema: string,
+    userTable: string,
+    credentials: Credentials,
+  ): Promise<unknown> {
+    const client = await getClient();
+    try {
+      const keys = Object.keys(credentials);
+      const values = Object.values(credentials);
+      const placeholders = keys.map((_value, index) => `$${index + 1}`).join(
+        ", ",
+      );
+
+      const query = `INSERT INTO ${schema}.${userTable} (${
+        keys.join(
+          ", ",
+        )
+      }) VALUES (${placeholders})`;
+
+      const result = await client.queryObject(query, values);
+
+      return result;
+    } finally {
+      client.release();
+    }
+  },
+
+  async getKey(schema: string, keyTable: string): Promise<string> {
+    const client = await getClient();
+    try {
+      const query = `SELECT key FROM ${schema}.${keyTable} LIMIT 1`;
+      const result = await client.queryObject<{ key: string }>(query);
+      if (result.rowCount && result.rowCount > 0) {
+        return result.rows[0].key;
+      }
+      throw new Error("API key not found in database");
     } finally {
       client.release();
     }

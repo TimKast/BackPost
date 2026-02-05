@@ -1,3 +1,8 @@
+import { ConfigSchema } from "../config/schema.ts";
+import {
+  createLoginHandler,
+  createRegisterHandler,
+} from "../handler/auth_handler.ts";
 import {
   deleteHandler,
   getHandler,
@@ -5,6 +10,7 @@ import {
   postHandler,
   rpcHandler,
 } from "../handler/db_handler.ts";
+import { checkAuth } from "../helper/auth.ts";
 import { Filter, parseUrlSearchParams } from "./url_parser.ts";
 
 export type Handler = (
@@ -21,17 +27,21 @@ export interface Route {
 
 export class Router {
   private routes: Route[] = [];
+  private config: ConfigSchema;
 
-  constructor(authHandlers?: { login?: Handler }) {
-    this.add("GET", "/:tableName", getHandler);
-    this.add("POST", "/:tableName", postHandler);
-    this.add("PATCH", "/:tableName", patchHandler);
-    this.add("DELETE", "/:tableName", deleteHandler);
-    this.add("GET", "/view/:tableName", getHandler);
-    this.add("POST", "/rpc/:procedure", rpcHandler);
+  constructor(config: ConfigSchema) {
+    this.config = config;
 
-    if (authHandlers?.login) {
-      this.add("POST", "/auth/login", authHandlers.login);
+    this.add("GET", "/:schema/:tableName", getHandler);
+    this.add("POST", "/:schema/:tableName", postHandler);
+    this.add("PATCH", "/:schema/:tableName", patchHandler);
+    this.add("DELETE", "/:schema/:tableName", deleteHandler);
+    this.add("GET", "/:schema/view/:tableName", getHandler);
+    this.add("POST", "/:schema/rpc/:procedure", rpcHandler);
+
+    if (this.config.auth?.login_table) {
+      this.add("POST", "/login", createLoginHandler(this.config));
+      this.add("POST", "/register", createRegisterHandler(this.config));
     }
   }
 
@@ -54,11 +64,27 @@ export class Router {
           if (match) {
             const params = match.pathname.groups || {};
             const filters = parseUrlSearchParams(url.searchParams);
+            try {
+              await checkAuth(req, this.config);
+            } catch (error) {
+              return new Response(
+                JSON.stringify({
+                  error: "Unauthorized",
+                  message: error instanceof Error
+                    ? error.message
+                    : String(error),
+                }),
+                {
+                  status: 401,
+                  headers: { "Content-Type": "application/json" },
+                },
+              );
+            }
+
             return await route.handler(req, params, filters);
           }
         }
       }
-
       return new Response(
         JSON.stringify({ error: "Route not found" }),
         {

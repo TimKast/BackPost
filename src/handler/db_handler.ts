@@ -2,13 +2,13 @@ import { db } from "../db/db.ts";
 import type { Handler } from "../server/router.ts";
 
 export const getHandler: Handler = async (_req, params, filters) => {
-  const tableName = params.tableName;
+  const fullName = `${params.schema}.${params.tableName}`;
 
-  const data = await db.find(tableName!, filters);
+  const data = await db.find(fullName!, filters);
 
   return new Response(
     JSON.stringify({
-      table: tableName,
+      table: fullName,
       rowCount: data.rows.length,
       data: data.rows,
     }),
@@ -20,10 +20,10 @@ export const getHandler: Handler = async (_req, params, filters) => {
 };
 
 export const postHandler: Handler = async (req, params) => {
-  const tableName = params.tableName;
+  const fullName = `${params.schema}.${params.tableName}`;
   const body = await req.json();
 
-  const result = await db.create(tableName!, body);
+  const result = await db.create(fullName!, body);
   return new Response(JSON.stringify({ success: true, result }), {
     status: 201,
     headers: { "Content-Type": "application/json" },
@@ -31,10 +31,10 @@ export const postHandler: Handler = async (req, params) => {
 };
 
 export const patchHandler: Handler = async (req, params, filters) => {
-  const tableName = params.tableName;
+  const fullName = `${params.schema}.${params.tableName}`;
   const body = await req.json();
 
-  const result = await db.update(tableName!, filters, body);
+  const result = await db.update(fullName!, filters, body);
   return new Response(JSON.stringify({ success: true, result }), {
     status: 200,
     headers: { "Content-Type": "application/json" },
@@ -42,9 +42,9 @@ export const patchHandler: Handler = async (req, params, filters) => {
 };
 
 export const deleteHandler: Handler = async (_req, params, filters) => {
-  const tableName = params.tableName;
+  const fullName = `${params.schema}.${params.tableName}`;
 
-  const result = await db.delete(tableName!, filters);
+  const result = await db.delete(fullName!, filters);
   return new Response(JSON.stringify({ success: true, result }), {
     status: 200,
     headers: { "Content-Type": "application/json" },
@@ -52,10 +52,10 @@ export const deleteHandler: Handler = async (_req, params, filters) => {
 };
 
 export const rpcHandler: Handler = async (req, params) => {
-  const procedure = params.procedure;
+  const fullName = `${params.schema}.${params.procedure}`;
   const body = await req.json();
 
-  const result = await db.callProcedure(procedure!, body);
+  const result = await db.callProcedure(fullName!, body);
   return new Response(JSON.stringify({ success: true, result }), {
     status: 200,
     headers: { "Content-Type": "application/json" },

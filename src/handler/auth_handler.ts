@@ -39,3 +39,52 @@ export const createLoginHandler = (config: ConfigSchema): Handler => {
     );
   };
 };
+
+export const createRegisterHandler = (config: ConfigSchema): Handler => {
+  return async (req, _params, _filters) => {
+    const loginTable = config.auth.login_table!;
+
+    const body = await req.json();
+    const { username, password } = body as Credentials;
+
+    const existingUser = await dbAuth.login(
+      config.auth.schema!,
+      loginTable,
+      { username, password },
+    );
+
+    if (existingUser) {
+      return new Response(
+        JSON.stringify({ message: "User already exists" }),
+        {
+          status: 409,
+          headers: { "Content-Type": "application/json" },
+        },
+      );
+    }
+
+    const newUser = await dbAuth.register(
+      config.auth.schema!,
+      loginTable,
+      { username, password },
+    );
+
+    if (newUser) {
+      return new Response(
+        JSON.stringify({ message: "Registration successful" }),
+        {
+          status: 201,
+          headers: { "Content-Type": "application/json" },
+        },
+      );
+    }
+
+    return new Response(
+      JSON.stringify({ message: "Registration failed" }),
+      {
+        status: 500,
+        headers: { "Content-Type": "application/json" },
+      },
+    );
+  };
+};

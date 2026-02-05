@@ -232,6 +232,19 @@ function buildComponents(db: DbSchema): Record<string, unknown> {
     },
   };
 
+  components["securitySchemes"] = {
+    ApiKeyAuth: {
+      type: "apiKey",
+      in: "header",
+      name: "X-API-Key",
+    },
+    BearerAuth: {
+      type: "http",
+      scheme: "bearer",
+      bearerFormat: "JWT",
+    },
+  };
+
   return components;
 }
 
@@ -246,5 +259,11 @@ export function generateOpenApi(
     info: { title, version },
     paths: buildPaths(schema),
     components: buildComponents(schema),
+    security: [
+      {
+        ApiKeyAuth: [],
+        BearerAuth: [],
+      },
+    ],
   };
 }

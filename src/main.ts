@@ -1,7 +1,6 @@
 import { parseArgs } from "@std/cli/parse-args";
 import { loadConfig } from "./config/load.ts";
 import { initDB } from "./db/connection.ts";
-import { createLoginHandler } from "./handler/auth_handler.ts";
 import { generateOpenApi } from "./schema/openapi.ts";
 import { initSchema } from "./schema/schema.ts";
 import { initAuth } from "./server/auth.ts";
@@ -27,11 +26,7 @@ await initAuth(config);
 
 await initSchema();
 
-const loginHandler = createLoginHandler(config);
-
-const router = new Router({
-  login: loginHandler,
-});
+const router = new Router(config);
 
 Deno.serve(async (req) => {
   const url = new URL(req.url);
